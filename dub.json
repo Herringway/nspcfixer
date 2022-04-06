@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"Cameron \"Herringway\" Ross"
+	],
+	"copyright": "Copyright © 2022, Cameron \"Herringway\" Ross",
+	"description": "NSPC pack fixer",
+	"license": "BSL-1.0",
+	"name": "nspcfixer",
+	"dependencies": {
+		"siryul": "~>0.6"
+	}
+}
