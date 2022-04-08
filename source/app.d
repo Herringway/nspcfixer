@@ -21,7 +21,7 @@ void main(string[] args) {
 	string configFile;
 	bool verbose;
 	void parseNewBaseAddress(string, string value) {
-		newBaseAddress = parse!ushort(value, value.skipOver("0x") ? 16 : 10);
+		newBaseAddress = parse!ushort(value, value.skipOver("0x", "$") ? 16 : 10);
 	}
 	auto help = getopt(args,
 		"b|base", &baseAddress,
