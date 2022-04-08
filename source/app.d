@@ -61,6 +61,7 @@ void main(string[] args) {
 	song.remapInstruments(config.instrumentMapping);
 	tracef("Found phrase headers: %($%04X %)", song.phraseHeaders);
 	tracef("Found phrase addresses: %($%04X %)", song.phraseAddresses);
+	infof("Writing to %s", outFile);
 	with (File(outFile, "w")) {
 		const data = song.toRaw;
 		if (packMode) {
