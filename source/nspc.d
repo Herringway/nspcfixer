@@ -139,12 +139,6 @@ struct Song {
 					command.instrument = instrument;
 					seen[cast(size_t)(&command.instrument())] = true;
 				}
-				if (command.command == SequenceCommand.callSubroutine && (cast(size_t)(&command.address()) !in seen)) {
-					if (recurse) {
-						fixSequence(getSequenceData(command.address, baseAddress, commandSet, phraseData, phraseDataOffset));
-					}
-					seen[cast(size_t)(&command.instrument())] = true;
-				}
 			}
 		}
 		fixSequence(getSequenceData(cast(ushort)(_baseAddress + phraseDataOffset), _baseAddress, commandSet, phraseData, phraseDataOffset, true));
