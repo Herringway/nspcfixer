@@ -45,6 +45,7 @@ void main(string[] args) {
 		fileRaw = fileRaw[4 .. $];
 	}
 	auto song = loadSong(baseAddress, fileRaw);
+	infof("Remapping address from $%04X to $%04X", baseAddress, newBaseAddress);
 	song.baseAddress = newBaseAddress;
 	if (config.randomizeNotes) {
 		byte[12] noteMapping = iota(0, 12).map!(x => cast(byte)uniform(config.lowerNoteAdjustment, config.upperNoteAdjustment)).array;
