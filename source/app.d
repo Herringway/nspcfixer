@@ -2,11 +2,12 @@ module app;
 
 import std.algorithm.iteration : map;
 import std.array : array;
+import std.experimental.logger;
 import std.getopt;
 import std.mmfile;
 import std.random : uniform;
 import std.range : iota;
-import std.stdio : File, writefln;
+import std.stdio : File, stdout, writefln;
 import siryul;
 import nspc;
 
@@ -16,16 +17,21 @@ void main(string[] args) {
 	bool packMode;
 	string outFile = "test.ebm";
 	string configFile;
+	bool verbose;
 	auto help = getopt(args,
 		"b|base", &baseAddress,
 		"n|newbase", &newBaseAddress,
 		"p|packfile", &packMode,
 		"c|configfile", &configFile,
+		"v|verbose", &verbose,
 		"o|outfile", &outFile,
 	);
 	if (help.helpWanted) {
 		defaultGetoptPrinter("", help.options);
 		return;
+	}
+	if (verbose) {
+		sharedLog = new FileLogger(stdout, LogLevel.all);
 	}
 	Config config;
 	if (configFile !is null) {
@@ -47,8 +53,8 @@ void main(string[] args) {
 		song.transposeNotes(config.noteMapping);
 	}
 	song.remapInstruments(config.instrumentMapping);
-	writefln!"%($%04X %)"(song.phraseHeaders);
-	writefln!"%($%04X %)"(song.phraseAddresses);
+	tracef("Found phrase headers: %($%04X %)", song.phraseHeaders);
+	tracef("Found phrase addresses: %($%04X %)", song.phraseAddresses);
 	with (File(outFile, "w")) {
 		const data = song.toRaw;
 		if (packMode) {

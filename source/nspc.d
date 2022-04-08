@@ -1,5 +1,6 @@
+module nspc;
 import std;
-//import siryul;
+import std.experimental.logger;
 
 private auto getSequenceData(ushort addr, ushort baseAddress, CommandSet commandSet, ubyte[] phraseData, ushort phraseDataOffset, bool ignoreEnd = false) {
 	static struct Sequence {
@@ -45,10 +46,10 @@ struct Song {
 	ushort baseAddress(ushort newAddress) {
 		bool[size_t] seen;
 		void fixSequence(T)(T channel) {
-			writefln!"%04X (%d)"(channel.phraseLocation, channel.phraseData.length);
+			tracef("Fixing up addresses at $%04X (%d)", channel.phraseLocation, channel.phraseData.length);
 			foreach (ref command; channel) {
 				if (command.command == SequenceCommand.callSubroutine && (cast(size_t)(&command.address()) !in seen)) {
-					writefln!"%04X -> %04X"(command.address, cast(ushort)((command.address - baseAddress) + newAddress));
+					tracef("Fixing address %04X -> %04X", command.address, cast(ushort)((command.address - baseAddress) + newAddress));
 					//fixSequence(getSequenceData(command.address, baseAddress, commandSet, phraseData, phraseDataOffset));
 					command.address = cast(ushort)((command.address - baseAddress) + newAddress);
 					seen[cast(size_t)(&command.address())] = true;
@@ -128,12 +129,12 @@ struct Song {
 	void remapInstruments(const scope ubyte[ubyte] mapping) {
 		bool[size_t] seen;
 		void fixSequence(T)(T channel, bool recurse = false) {
-			writefln!"%04X (%d)"(channel.phraseLocation, channel.phraseData.length);
+			tracef("Remapping instruments at $%04X (%d)", channel.phraseLocation, channel.phraseData.length);
 			foreach (ref command; channel) {
 				if (command.command == SequenceCommand.instrument && (cast(size_t)(&command.instrument()) !in seen)) {
 					const ubyte instrument = mapping.get(command.instrument, command.instrument);
 					if (instrument != command.instrument) {
-						writefln!"%02X -> %02X"(command.instrument, instrument);
+						tracef("Remapping instrument: %02X -> %02X", command.instrument, instrument);
 					}
 					command.instrument = instrument;
 					seen[cast(size_t)(&command.instrument())] = true;
@@ -151,12 +152,14 @@ struct Song {
 	void transposeNotes(const byte[12] mapping) {
 		bool[size_t] seen;
 		void transposeNotes(T)(T channel, const byte[12] adjustments) {
-			writefln!"%04X (%d)"(channel.phraseLocation, channel.phraseData.length);
+			tracef("Transposing notes at $%04X (%d)", channel.phraseLocation, channel.phraseData.length);
 			foreach (ref command; channel) {
 				if (command.command.among(SequenceCommand.note, SequenceCommand.pitchSlide) && (cast(size_t)(&command.note()) !in seen)) {
 					const newNote = cast(ubyte)clamp(command.note + adjustments[(command.note - 0x80)%12], 0x80, 0xC7);
-					writefln!"%02X -> %02X"(command.note, newNote);
-					command.note = newNote;
+					if (command.note != newNote) {
+						tracef("Transposing note: %02X -> %02X", command.note, newNote);
+						command.note = newNote;
+					}
 					seen[cast(size_t)(&command.note())] = true;
 				}
 			}
