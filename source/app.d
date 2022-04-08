@@ -1,7 +1,9 @@
 module app;
 
 import std.algorithm.iteration : map;
+import std.algorithm.searching : skipOver;
 import std.array : array;
+import std.conv : parse;
 import std.experimental.logger;
 import std.getopt;
 import std.mmfile;
@@ -18,9 +20,12 @@ void main(string[] args) {
 	string outFile = "test.ebm";
 	string configFile;
 	bool verbose;
+	void parseNewBaseAddress(string, string value) {
+		newBaseAddress = parse!ushort(value, value.skipOver("0x") ? 16 : 10);
+	}
 	auto help = getopt(args,
 		"b|base", &baseAddress,
-		"n|newbase", &newBaseAddress,
+		"n|newbase", &parseNewBaseAddress,
 		"p|packfile", &packMode,
 		"c|configfile", &configFile,
 		"v|verbose", &verbose,
