@@ -2,30 +2,30 @@ import std;
 //import siryul;
 
 private auto getSequenceData(ushort addr, ushort baseAddress, CommandSet commandSet, ubyte[] phraseData, ushort phraseDataOffset, bool ignoreEnd = false) {
-		static struct Sequence {
-			ushort baseAddress;
-			ushort phraseLocation;
-			ubyte[] phraseData;
-			CommandSet commandSet;
-			size_t idx;
-			void popFront() {
-				idx += commandLengths[commandSet][phraseData[idx]];
-			}
-			bool empty() const {
-				return (idx >= phraseData.length) || (phraseData[idx] !in commandLengths[commandSet]) || (idx + commandLengths[commandSet][phraseData[idx]] > phraseData.length);
-			}
-			auto front() {
-				return Command(phraseData[idx .. idx + commandLengths[commandSet][phraseData[idx]]]);
-			}
+	static struct Sequence {
+		ushort baseAddress;
+		ushort phraseLocation;
+		ubyte[] phraseData;
+		CommandSet commandSet;
+		size_t idx;
+		void popFront() {
+			idx += commandLengths[commandSet][phraseData[idx]];
 		}
-		if (addr == 0) {
-			return Sequence(baseAddress, 0, [], commandSet);
+		bool empty() const {
+			return (idx >= phraseData.length) || (phraseData[idx] !in commandLengths[commandSet]) || (idx + commandLengths[commandSet][phraseData[idx]] > phraseData.length);
 		}
-		if (ignoreEnd) {
-			return Sequence(baseAddress, addr, phraseData[addr - baseAddress - phraseDataOffset .. $], commandSet);
-		} else {
-			return Sequence(baseAddress, addr, phraseData[addr - baseAddress - phraseDataOffset .. addr - baseAddress - phraseDataOffset + phraseData[addr - baseAddress - phraseDataOffset .. $].countUntil(0) + 1], commandSet);
+		auto front() {
+			return Command(phraseData[idx .. idx + commandLengths[commandSet][phraseData[idx]]]);
 		}
+	}
+	if (addr == 0) {
+		return Sequence(baseAddress, 0, [], commandSet);
+	}
+	if (ignoreEnd) {
+		return Sequence(baseAddress, addr, phraseData[addr - baseAddress - phraseDataOffset .. $], commandSet);
+	} else {
+		return Sequence(baseAddress, addr, phraseData[addr - baseAddress - phraseDataOffset .. addr - baseAddress - phraseDataOffset + phraseData[addr - baseAddress - phraseDataOffset .. $].countUntil(0) + 1], commandSet);
+	}
 }
 
 struct Config {
